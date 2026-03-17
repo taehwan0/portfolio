@@ -1,0 +1,23 @@
+---
+interface Props {
+  title: string;
+  period: string;
+  organization?: string;
+  Content: any;
+}
+
+const { title, period, organization, Content } = Astro.props;
+---
+
+<div class="py-3 border-b border-gray-100 dark:border-gray-800">
+  <div class="flex gap-3 items-baseline">
+    <span class="text-sm text-gray-400 dark:text-gray-500">{period}</span>
+    <span class="text-base font-medium dark:text-gray-200">{title}</span>
+    {organization && <span class="text-sm text-gray-500 dark:text-gray-400">{organization}</span>}
+  </div>
+  {Content && (
+    <div class="prose mt-2">
+      <Content />
+    </div>
+  )}
+</div>

@@ -1,0 +1,17 @@
+---
+import { getConfig } from '@/lib/config';
+
+const config = getConfig();
+const { sections, name } = config;
+---
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 no-print">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 flex items-center justify-between h-12">
+    <a href="#" class="text-sm font-semibold dark:text-white">{name}</a>
+    <div class="flex gap-4">
+      {sections?.map((section) => (
+        <a href={`#${section.id}`} class="text-sm text-gray-500 dark:text-gray-400 hover:text-accent">{section.title}</a>
+      ))}
+    </div>
+  </div>
+</nav>

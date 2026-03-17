@@ -1,0 +1,94 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import Navigation from '@/components/Navigation.astro';
+import Section from '@/components/Section.astro';
+import WorkItem from '@/components/WorkItem.astro';
+import ActivityItem from '@/components/ActivityItem.astro';
+import SimpleList from '@/components/SimpleList.astro';
+import SkillTags from '@/components/SkillTags.astro';
+import Footer from '@/components/Footer.astro';
+import { getConfig } from '@/lib/config';
+
+const config = getConfig();
+
+// Fetch collections safely (empty array if collection has no files)
+const workEntries = await getCollection('work').catch(() => []);
+const projectEntries = await getCollection('project').catch(() => []);
+const activityEntries = await getCollection('activity').catch(() => []);
+const skillsEntries = await getCollection('skills').catch(() => []);
+const educationEntries = await getCollection('education').catch(() => []);
+const certificationEntries = await getCollection('certification').catch(() => []);
+
+// Sort by order
+const sortedWork = [...workEntries].sort((a: any, b: any) => (a.data.order ?? 99) - (b.data.order ?? 99));
+const sortedProject = [...projectEntries].sort((a: any, b: any) => (a.data.order ?? 99) - (b.data.order ?? 99));
+const sortedActivity = [...activityEntries].sort((a: any, b: any) => (a.data.order ?? 99) - (b.data.order ?? 99));
+
+// Render content for all entries
+const renderedContent = new Map<string, any>();
+
+for (const entries of [sortedWork, sortedProject, sortedActivity, skillsEntries, educationEntries, certificationEntries]) {
+  for (const entry of entries) {
+    const { Content } = await render(entry as any);
+    renderedContent.set(entry.id, Content);
+  }
+}
+
+// Build section data map
+type SectionType = 'work' | 'activity' | 'skills' | 'simple';
+const sectionDataMap: Record<string, { type: SectionType; entries: any[] }> = {
+  work: { type: 'work', entries: sortedWork },
+  project: { type: 'work', entries: sortedProject },
+  activity: { type: 'activity', entries: sortedActivity },
+  skills: { type: 'skills', entries: skillsEntries },
+  education: { type: 'simple', entries: educationEntries },
+  certification: { type: 'simple', entries: certificationEntries },
+};
+---
+
+<Layout>
+  <Navigation />
+  <Header />
+
+  {config.sections.map((section) => {
+    const data = sectionDataMap[section.id];
+    if (!data || data.entries.length === 0) return null;
+
+    return (
+      <Section id={section.id} title={section.title}>
+        {data.type === 'work' && data.entries.map((entry: any) => (
+          <WorkItem
+            title={entry.data.title}
+            subtitle={entry.data.subtitle}
+            period={entry.data.period}
+            company={entry.data.company}
+            tags={entry.data.tags}
+            logo={entry.data.logo}
+            Content={renderedContent.get(entry.id)}
+          />
+        ))}
+
+        {data.type === 'activity' && data.entries.map((entry: any) => (
+          <ActivityItem
+            title={entry.data.title}
+            period={entry.data.period}
+            organization={entry.data.organization}
+            Content={renderedContent.get(entry.id)}
+          />
+        ))}
+
+        {data.type === 'skills' && data.entries.map((entry: any) => (
+          <SkillTags Content={renderedContent.get(entry.id)} />
+        ))}
+
+        {data.type === 'simple' && data.entries.map((entry: any) => (
+          <SimpleList Content={renderedContent.get(entry.id)} />
+        ))}
+      </Section>
+    );
+  })}
+
+  <Footer />
+</Layout>

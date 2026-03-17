@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.omc/
+.claude/
+docs/
+*.swp
+SPEC.md

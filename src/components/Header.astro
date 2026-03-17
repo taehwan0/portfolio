@@ -1,0 +1,44 @@
+---
+import { getConfig } from '@/lib/config';
+
+const config = getConfig();
+const { name, title, intro, profileImage, contacts } = config;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const contactLinks = contacts?.map((c) => {
+  if (c.type === 'email') return { label: 'Email', href: `mailto:${c.value}` };
+  return { label: c.type.charAt(0).toUpperCase() + c.type.slice(1), href: c.url };
+}).filter((c) => c.href) ?? [];
+---
+
+<header class="mb-12">
+  <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start">
+    {profileImage && (
+      <img
+        src={`${base}${profileImage}`}
+        alt={name}
+        class="w-28 h-28 rounded-full object-cover shrink-0"
+      />
+    )}
+    <div class="text-center sm:text-left">
+      <h1 class="text-4xl font-bold dark:text-white">{name}</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mt-1">{title}</p>
+      {contactLinks.length > 0 && (
+        <div class="flex gap-4 mt-3 justify-center sm:justify-start">
+          {contactLinks.map((link) => (
+            <a
+              href={link.href}
+              target={link.href?.startsWith('mailto:') ? undefined : '_blank'}
+              rel={link.href?.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+              class="text-accent hover:underline text-base"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+  {intro && <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line mt-8 text-lg leading-relaxed">{intro}</p>}
+</header>
